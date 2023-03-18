@@ -1,3 +1,3 @@
-# Hine
+# Parserer
 
-A simple state machine library.
+A Svelte parser

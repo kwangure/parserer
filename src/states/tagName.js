@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const tagNameState = atomic({
-	name: 'tagName',
+export const createTagName = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

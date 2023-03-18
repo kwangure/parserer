@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const fragmentState = atomic({
-	name: 'fragment',
+export const createFragment = () => atomic({
 	always: [{
 		transitionTo: 'done',
 		condition: 'isDone',

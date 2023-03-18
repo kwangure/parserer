@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const afterCommentContentState = atomic({
-	name: 'afterCommentContent',
+export const createAfterCommentContent = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

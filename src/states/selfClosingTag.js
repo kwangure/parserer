@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const selfClosingTagState = atomic({
-	name: 'selfClosingTag',
+export const createSelfClosingTag = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

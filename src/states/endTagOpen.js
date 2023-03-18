@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const endTagOpenState = atomic({
-	name: 'endTagOpen',
+export const createEndTagOpen = () => atomic({
 	on: {
 		CHARACTER: [
 			{

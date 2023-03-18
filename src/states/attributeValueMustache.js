@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const attributeValueMustacheState = atomic({
-	name: 'attributeValueMustache',
+export const createAttributeValueMustache = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

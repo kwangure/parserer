@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const beforeAttributeValueState = atomic({
-	name: 'beforeAttributeValue',
+export const createBeforeAttributeValue = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

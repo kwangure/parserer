@@ -1,5 +1,5 @@
 import { atomic } from 'hine';
 
-export const notImplementedState = atomic({
+export const createNotImplemented = () => atomic({
 	name: 'notImplemented',
 });

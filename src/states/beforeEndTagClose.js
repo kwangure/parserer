@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const beforeEndTagCloseState = atomic({
-	name: 'beforeEndTagClose',
+export const createBeforeEndTagClose = () => atomic({
 	on: {
 		CHARACTER: [
 			{

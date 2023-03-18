@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const afterAttributeValueQuoted = atomic({
-	name: 'afterAttributeValueQuoted',
+export const createAfterAttributeValueQuoted = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const textState = atomic({
-	name: 'text',
+export const createText = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

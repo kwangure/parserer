@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const tagOpenState = atomic({
-	name: 'tagOpen',
+export const createTagOpen = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

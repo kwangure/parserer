@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const beforeCommentEndState = atomic({
-	name: 'beforeCommentEnd',
+export const createBeforeCommentEnd = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

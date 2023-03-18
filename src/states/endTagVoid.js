@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const endTagVoidState = atomic({
-	name: 'endTagVoid',
+export const createEndTagVoid = () => atomic({
 	on: {
 		CHARACTER: [
 			{

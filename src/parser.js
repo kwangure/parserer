@@ -1,32 +1,34 @@
 import * as acorn from './acorn.js';
 import * as h from 'hine';
 import { PMAttribute, PMComment, PMElement, PMFragment, PMInvalid, PMMustacheTag, PMScript, PMText } from './nodes.js';
-import { afterAttributeNameState } from './states/afterAttributeName.js';
-import { afterAttributeValueQuoted } from './states/afterAttributeValueQuoted.js';
-import { afterCommentBangState } from './states/afterCommentBang.js';
-import { afterCommentContentState } from './states/afterCommentContent.js';
-import { attributeNameState } from './states/attributeName.js';
-import { attributeValueMustacheState } from './states/attributeValueMustache.js';
-import { attributeValueQuotedState } from './states/attributeValueQuoted.js';
-import { attributeValueUnquotedState } from './states/attributeValueUnquoted.js';
-import { beforeAttributeNameState } from './states/beforeAttributeName.js';
-import { beforeAttributeValueState } from './states/beforeAttributeValue.js';
-import { beforeCommentEndState } from './states/beforeCommentEnd.js';
-import { beforeCommentStartState } from './states/beforeCommentStart.js';
-import { beforeEndTagCloseState } from './states/beforeEndTagClose.js';
-import { commentContentState } from './states/commentContent.js';
-import { doneState } from './states/done.js';
-import { endTagNameState } from './states/endTagName.js';
-import { endTagOpenState } from './states/endTagOpen.js';
-import { endTagVoidState } from './states/endTagVoid.js';
-import { fragmentState } from './states/fragment.js';
-import { invalidState } from './states/invalid.js';
-// import { notImplementedState } from './states/notImplemented.js';
+import { createAfterAttributeName } from './states/afterAttributeName.js';
+import { createAfterAttributeValueQuoted } from './states/afterAttributeValueQuoted.js';
+import { createAfterCommentBang } from './states/afterCommentBang.js';
+import { createAfterCommentContent } from './states/afterCommentContent.js';
+import { createAttributeName } from './states/attributeName.js';
+import { createAttributeValueMustache } from './states/attributeValueMustache.js';
+import { createAttributeValueQuoted } from './states/attributeValueQuoted.js';
+import { createAttributeValueUnquoted } from './states/attributeValueUnquoted.js';
+import { createBeforeAttributeName } from './states/beforeAttributeName.js';
+import { createBeforeAttributeValue } from './states/beforeAttributeValue.js';
+import { createBeforeCommentEnd } from './states/beforeCommentEnd.js';
+import { createBeforeCommentStart } from './states/beforeCommentStart.js';
+import { createBeforeEndTagClose } from './states/beforeEndTagClose.js';
+import { createCommentContent } from './states/commentContent.js';
+import { createDone } from './states/done.js';
+import { createEndTagName } from './states/endTagName.js';
+import { createEndTagOpen } from './states/endTagOpen.js';
+import { createEndTagVoid } from './states/endTagVoid.js';
+import { createFragment } from './states/fragment.js';
+import { createInvalid } from './states/invalid.js';
+// import { createNotImplemented } from './states/notImplemented.js';
+import { createSelfClosingTag } from './states/selfClosingTag.js';
+import { createTagName } from './states/tagName.js';
+import { createTagOpen } from './states/tagOpen.js';
+import { createText } from './states/text.js';
 import { PMStack } from './stack.js';
-import { selfClosingTagState } from './states/selfClosingTag.js';
-import { tagNameState } from './states/tagName.js';
-import { tagOpenState } from './states/tagOpen.js';
-import { textState } from './states/text.js';
+
+/** @typedef {import('./nodes.js').PMElementChild} ElementChild */
 
 export const EOF = Symbol('EOF');
 /**
@@ -49,7 +51,6 @@ export function createParser() {
 	parser.configure({
 		actions: {
 			'$index.increment'() {
-				debugger;
 				index += 1;
 			},
 			/** @param {string} value */
@@ -95,7 +96,7 @@ export function createParser() {
 			},
 			'$stack.popElement'() {
 				const current = stack.pop({ expect: 'Element' });
-				let parentTag = stack.pop();
+				let parentTag = /** @type {ElementChild} */(stack.pop());
 
 				// close any elements that don't have their own closing tags, e.g. <div><p></div>
 				while (parentTag.type === 'Element' && parentTag.name !== current.name) {
@@ -109,7 +110,7 @@ export function createParser() {
 					// }
 
 					parentTag.end = current.start;
-					const nextParent = stack.pop();
+					const nextParent = /** @type {ElementChild} */(stack.pop());
 					nextParent.append(parentTag);
 					parentTag = nextParent;
 				}
@@ -129,11 +130,11 @@ export function createParser() {
 				const invalid = stack.pop({ expect: 'Invalid' });
 				invalid.end = index;
 
-				const nodeWithError = stack.pop();
+				const nodeWithError = /** @type {ElementChild} */(stack.pop());
 				nodeWithError.end = index;
 				nodeWithError.error = invalid;
 
-				const parent = stack.peek();
+				const parent = /** @type {ElementChild} */(stack.peek());
 				parent.append(nodeWithError);
 				parent.end = index;
 			},
@@ -368,30 +369,30 @@ export function createParser() {
 			},
 		},
 		states: {
-			fragmentState,
-			afterAttributeNameState,
-			afterAttributeValueQuoted,
-			afterCommentBangState,
-			afterCommentContentState,
-			attributeNameState,
-			attributeValueMustacheState,
-			attributeValueQuotedState,
-			attributeValueUnquotedState,
-			beforeAttributeNameState,
-			beforeAttributeValueState,
-			beforeCommentEndState,
-			beforeCommentStartState,
-			beforeEndTagCloseState,
-			commentContentState,
-			doneState,
-			endTagNameState,
-			endTagOpenState,
-			endTagVoidState,
-			invalidState,
-			selfClosingTagState,
-			tagNameState,
-			tagOpenState,
-			textState,
+			fragment: createFragment(),
+			afterAttributeName: createAfterAttributeName(),
+			afterAttributeValueQuoted: createAfterAttributeValueQuoted(),
+			afterCommentBang: createAfterCommentBang(),
+			afterCommentContent: createAfterCommentContent(),
+			attributeName: createAttributeName(),
+			attributeValueMustache: createAttributeValueMustache(),
+			attributeValueQuoted: createAttributeValueQuoted(),
+			attributeValueUnquoted: createAttributeValueUnquoted(),
+			beforeAttributeName: createBeforeAttributeName(),
+			beforeAttributeValue: createBeforeAttributeValue(),
+			beforeCommentEnd: createBeforeCommentEnd(),
+			beforeCommentStart: createBeforeCommentStart(),
+			beforeEndTagClose: createBeforeEndTagClose(),
+			commentContent: createCommentContent(),
+			done: createDone(),
+			endTagName: createEndTagName(),
+			endTagOpen: createEndTagOpen(),
+			endTagVoid: createEndTagVoid(),
+			invalid: createInvalid(),
+			selfClosingTag: createSelfClosingTag(),
+			tagName: createTagName(),
+			tagOpen: createTagOpen(),
+			text: createText(),
 		},
 	});
 	parser.resolve().start();
@@ -430,7 +431,6 @@ export function createParser() {
 		},
 		parse: {
 			value() {
-				debugger;
 				while (index < source.length) {
 					this.step();
 				}

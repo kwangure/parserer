@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const attributeValueQuotedState = atomic({
-	name: 'attributeValueQuoted',
+export const createAttributeValueQuoted = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

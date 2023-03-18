@@ -1,7 +1,6 @@
 import { atomic } from 'hine';
 
-export const invalidState = atomic({
-	name: 'invalid',
+export const createInvalid = () => atomic({
 	always: [
 		{
 			transitionTo: 'done',

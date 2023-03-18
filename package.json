@@ -1,0 +1,73 @@
+{
+    "name": "@parserer/svelte",
+    "version": "0.0.0",
+    "description": "A Svelte parser",
+    "scripts": {
+        "format": "wireit",
+        "lint": "wireit",
+        "package": "wireit",
+        "pre-commit": "wireit",
+        "prepare": "husky install",
+        "release": "release-it",
+        "test": "wireit",
+        "test:playwright": "wireit",
+        "test:vitest": "wireit"
+    },
+    "keywords": [],
+    "license": "MIT",
+    "type": "module",
+    "devDependencies": {
+        "@kwangure/eslint-config-svelte": "^0.2.5",
+        "eslint": "^8.32.0",
+        "eslint-plugin-sort-class-members": "^1.16.0",
+        "eslint-plugin-svelte3": "^4.0.0",
+        "husky": "^8.0.3",
+        "release-it": "^15.6.0",
+        "type-fest": "^3.6.1",
+        "typescript": "^4.9.4",
+        "vitest": "^0.29.3",
+        "wireit": "^0.9.3"
+    },
+    "wireit": {
+        "format": {
+            "command": "eslint \"**/*.{js,svelte}\" --color --cache --fix --cache-location .eslintcache",
+            "files": [
+                "\"**/*.{js,svelte,ts}\"",
+                ".eslintignore",
+                ".eslintrc.cjs"
+            ]
+        },
+        "lint": {
+            "command": "eslint \"**/*.{js,svelte}\" --color --cache --cache-location .eslintcache",
+            "files": [
+                "\"**/*.{js,svelte,ts}\"",
+                ".eslintignore",
+                ".eslintrc.cjs"
+            ]
+        },
+        "package": {
+            "command": "node ./scripts/package/index.js"
+        },
+        "pre-commit": {
+            "dependencies": [
+                "test",
+                "format"
+            ]
+        },
+        "test": {
+            "dependencies": [
+                "test:vitest"
+            ]
+        },
+        "test:playwright": {
+            "command": "playwright test"
+        },
+        "test:vitest": {
+            "command": "vitest run"
+        }
+    },
+    "dependencies": {
+        "code-red": "^0.2.5",
+        "hine": "^0.0.2"
+    }
+}

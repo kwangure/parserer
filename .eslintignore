@@ -1,0 +1,13 @@
+# Build folders
+.svelte-kit
+.wireit
+build
+package
+dist
+
+# Asset folders
+static
+assets
+
+# Miscellaneous
+node_modules

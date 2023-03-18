@@ -1,0 +1,33 @@
+{
+    "html": {
+        "start": 0,
+        "end": 13,
+        "children": [
+            {
+                "start": 0,
+                "end": 13,
+                "attributes": [
+                    {
+                        "start": 3,
+                        "end": 11,
+                        "name": "d",
+                        "type": "Attribute",
+                        "value": [
+                            {
+                                "start": 8,
+                                "end": 10,
+                                "data": "12",
+                                "raw": "12",
+                                "type": "Text"
+                            }
+                        ]
+                    }
+                ],
+                "children": [],
+                "name": "d",
+                "type": "Element"
+            }
+        ],
+        "type": "Fragment"
+    }
+}

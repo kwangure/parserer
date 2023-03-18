@@ -5,7 +5,7 @@ import { tryToLoadJson } from './helpers.js';
 
 describe('parse', () => {
 	const samples = fs.readdirSync(`${__dirname}/samples`);
-	for (const dir of samples.slice(samples.length - 2)) {
+	for (const dir of samples) {
 		if (dir[0] === '.') return;
 
 		// add .solo to a sample directory name to only run that test
@@ -27,10 +27,7 @@ describe('parse', () => {
 			runner = test.only;
 		}
 
-		console.log('adding test', dir);
-
 		runner(dir, () => {
-			console.log('starting test', dir);
 			const input = fs
 				.readFileSync(`${__dirname}/samples/${dir}/input.sm`, 'utf-8')
 				.replace(/\s+$/, '')
@@ -39,7 +36,6 @@ describe('parse', () => {
 			const expectedError = tryToLoadJson(`${__dirname}/samples/${dir}/error.json`);
 
 			try {
-				console.log('creating parser');
 				const parser = createParser();
 				parser.init(input).parse();
 				fs.writeFileSync(`${__dirname}/samples/${dir}/_actual.json`, JSON.stringify(parser.result, null, 4));
@@ -56,7 +52,6 @@ describe('parse', () => {
 					throw err;
 				}
 			}
-			console.log('finished test', dir);
 		});
 	}
 });

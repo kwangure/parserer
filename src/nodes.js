@@ -213,6 +213,7 @@ export class PMAttribute extends PMBaseNode {
 	}
 	valueOf() {
 		return {
+			error: this.error?.valueOf(),
 			start: this.start,
 			end: this.end,
 			type: this.type,
@@ -220,7 +221,6 @@ export class PMAttribute extends PMBaseNode {
 			value: Array.isArray(this.value)
 				? this.value.map((value) => value.valueOf())
 				: this.value,
-			error: this.error?.valueOf(),
 		};
 	}
 }
@@ -262,11 +262,12 @@ export class PMComment extends PMBaseNode {
 	}
 }
 
+/**
+ * @typedef {PMComment | PMElement | PMInvalid | PMText} PMElementChild
+ */
 /** @extends {PMBaseNode<'Element'>} */
 export class PMElement extends PMBaseNode {
 	/**
-	 * @typedef {PMComment | PMElement | PMInvalid | PMText} PMElementChild
-	 *
 	 * @type {PMElementChild[]}
 	 */
 	#children = [];
@@ -326,13 +327,13 @@ export class PMElement extends PMBaseNode {
 	valueOf() {
 		// Maintain order of test snapshot
 		return {
+			error: this.error?.valueOf(),
 			start: this.start,
 			end: this.end,
 			type: this.type,
 			name: this.name,
 			attributes: this.attributes.map((attribute) => attribute.valueOf()),
 			children: this.#children.map((child) => child.valueOf()),
-			error: this.error?.valueOf(),
 		};
 	}
 }
@@ -438,10 +439,12 @@ export class PMMustacheTag extends PMBaseNode {
 		});
 	}
 	valueOf() {
-		const json = {};
 		const start = this.start + 1;
 		const source = `${' '.repeat(start)}${this.raw}`.trimEnd();
 		const end = source.length - 1;
+
+		let error;
+		let expression;
 		try {
 			const expressions = [];
 			let current = start;
@@ -457,21 +460,28 @@ export class PMMustacheTag extends PMBaseNode {
 					code: 'invalid-javascript-multiple-expression',
 					message: 'Expected a single expression in between the curly braces',
 				});
-				json.error = invalid.valueOf();
+				error = invalid.valueOf();
 			} else {
-				json.expression = expressions[0];
+				expression = expressions[0];
 			}
-		} catch (/** @type {any} */ error) {
+		} catch (/** @type {any} */ err) {
 			const invalid = new PMInvalid({
-				start: error.raisedAt,
+				start: err.raisedAt,
 				end: this.end,
 				code: 'invalid-javascript-expression',
-				message: error.message,
+				message: err.message,
 			});
-			json.error = invalid.valueOf();
+			error = invalid.valueOf();
 		}
 
-		return json;
+		return {
+			start: this.start,
+			end: this.end,
+			type: this.type,
+			raw: expression ? undefined : this.raw,
+			error,
+			expression,
+		};
 	}
 }
 
@@ -527,6 +537,7 @@ export class PMText extends PMBaseNode {
 	valueOf() {
 		// Maintain order of test snapshot
 		return {
+			error: this.error?.valueOf(),
 			start: this.start,
 			end: this.end,
 			type: this.type,

@@ -42,13 +42,12 @@ export function createParser() {
 	let error = /** @type {{ code: string; message: string } | null} */(null);
 	let index = 0;
 	let mustacheDepth = 0;
-	const parser = h.compound();
 	const maybeStack = new PMStack();
 	const stack = new PMStack();
 	let openQuote = /** @type {'"' | '\''} */'\'';
 	let source = '';
 
-	parser.configure({
+	const parser = h.compound({
 		actions: {
 			'$index.increment'() {
 				index += 1;
@@ -394,8 +393,7 @@ export function createParser() {
 			tagOpen: createTagOpen(),
 			text: createText(),
 		},
-	});
-	parser.resolve().start();
+	}).start();
 
 	let previous = '';
 	let current = '';

@@ -68,6 +68,6 @@
     },
     "dependencies": {
         "code-red": "^0.2.5",
-        "hine": "^0.0.2"
+        "hine": "^0.0.4"
     }
 }

@@ -19,6 +19,7 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@kwangure/strawberry": "^0.57.5"
+		"@kwangure/strawberry": "^0.57.5",
+		"diff-match-patch": "^1.0.5"
 	}
 }

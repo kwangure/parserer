@@ -45,6 +45,7 @@ export class PMStack {
 		}
 		const value = /** @type {PMTemplateNode} */(this.#value.pop());
 		if (options.expect && value.type !== options.expect) {
+			this.#value.push(value);
 			throw Error(`Expected to pop a '${options.expect}' node, but found a '${value.type}' instead.`);
 		}
 		return /** @type {Extract<PMTemplateNode, { type: T }>} */(value);

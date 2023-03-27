@@ -37,18 +37,20 @@ export class PMStack {
 	}
 	/**
 	 * @template {PMTemplateNode['type']} T
-	 * @param {{ expect?: T } | undefined} [options]
+	 * @param {{ depth?: number; expect?: T } | undefined} [options]
 	 */
 	pop(options = {}) {
+		const { depth = 1, expect } = options;
 		if (this.#value.length === 0) {
 			throw Error('Attempted to pop an empty stack');
 		}
-		const value = /** @type {PMTemplateNode} */(this.#value.pop());
-		if (options.expect && value.type !== options.expect) {
-			this.#value.push(value);
-			throw Error(`Expected to pop a '${options.expect}' node, but found a '${value.type}' instead.`);
+		const value = /** @type {PMTemplateNode} */(this.#value.at(-1 * depth));
+		if (expect && value.type !== expect) {
+			throw Error(`Expected to pop a '${expect}' node, but found a '${value.type}' instead.`);
 		}
-		return /** @type {Extract<PMTemplateNode, { type: T }>} */(value);
+		return /** @type {Extract<PMTemplateNode, { type: T }>} */(
+			this.#value.splice(this.#value.length - depth, 1)[0]
+		);
 	}
 	/** @param {PMTemplateNode[]} values */
 	push(...values) {

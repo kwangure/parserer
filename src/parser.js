@@ -1,6 +1,7 @@
 import * as acorn from './acorn.js';
 import * as h from 'hine';
 import { PMAttribute, PMComment, PMElement, PMFragment, PMInvalid, PMMustacheTag, PMScript, PMText } from './nodes.js';
+import { closingTagOmitted } from './utils/html.js';
 import { createAfterAttributeName } from './states/afterAttributeName.js';
 import { createAfterAttributeValueQuoted } from './states/afterAttributeValueQuoted.js';
 import { createAfterCommentBang } from './states/afterCommentBang.js';
@@ -117,6 +118,14 @@ export function createParser() {
 				const last = stack.peek();
 				last.append(parentTag);
 				last.end = index;
+			},
+			'$stack.popAutoclosedSibling'() {
+				const parentTag = stack.peek({ depth: 3 });
+				const autoclosedTag = stack.pop({ expect: 'Element', depth: 2 });
+				const trailingTag = stack.peek({ expect: 'Element', depth: 1 });
+
+				autoclosedTag.end = trailingTag.start;
+				parentTag.append(autoclosedTag);
 			},
 			'$stack.popSelfClosingElement'() {
 				const current = stack.pop({ expect: 'Element' });
@@ -292,6 +301,9 @@ export function createParser() {
 			'$mustacheDepth.decrement'() {
 				return mustacheDepth -= 1;
 			},
+			log() {
+				console.log('isAutoclosed');
+			},
 		},
 		conditions: {
 			/** @param {string} value */
@@ -353,6 +365,21 @@ export function createParser() {
 			/** @param {string} value */
 			isTagOpen(value) {
 				return value === '<';
+			},
+			isAutoclosedSibling() {
+				// Could there be an unclosed tag?
+				if (stack.size < 2) return false;
+				// TODO: What is there's something between them, e.g a comment?
+				const lastTag = stack.at(-1);
+				const potentialAutoclosedTag = stack.at(-2);
+
+				if (lastTag?.type !== 'Element' || potentialAutoclosedTag?.type !== 'Element') {
+					return false;
+				}
+
+				return closingTagOmitted(
+					potentialAutoclosedTag.name, lastTag.name,
+				);
 			},
 			/** @param {string} value */
 			isVoidTag(value) {

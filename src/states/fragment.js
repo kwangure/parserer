@@ -5,6 +5,10 @@ export const createFragment = () => atomic({
 		transitionTo: 'done',
 		condition: 'isDone',
 	}],
+	entry: [{
+		condition: 'isAutoclosedSibling',
+		actions: ['$stack.popAutoclosedSibling'],
+	}],
 	on: {
 		CHARACTER: [
 			{

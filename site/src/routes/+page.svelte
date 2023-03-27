@@ -1,19 +1,35 @@
 <script>
+	/* eslint-disable import/no-unresolved */
+	import '@kwangure/strawberry/default/button';
 	import { Code, json } from '@kwangure/strawberry/default/code';
 	import { Container } from '@kwangure/strawberry/default/input/container';
-	// eslint-disable-next-line
 	import { createParser } from '@parserer/svelte';
+	import { Diff } from '$lib/components';
+	import { parse as svelteParse } from 'svelte/compiler';
 
 	const parser = createParser();
 
-	let code = '<d d=ab"/>';
+	let code = '<d><p><p></d>';
+	/** @type {'stack' | 'parserer' | 'svelte' | 'diff'} */
+	let showing = 'stack';
 
 	$: parser.init(code);
 	$: rest = code.slice($parser.previous.length + $parser.current.length);
-	$: console.log({ rest });
+	$: stack = JSON.stringify($parser.stack, null, 4);
+	$: parserer = JSON.stringify($parser.result, null, 4);
+	$: svelte = JSON.stringify(parse(code), null, 4);
+
+	/** @param {string} code */
+	function parse(code) {
+		try {
+			return svelteParse(code);
+		} catch (error) {
+			return error;
+		}
+	}
 </script>
 
-{$parser.state.name} {$parser.index}
+{$parser.state?.name} {$parser.index}
 <div class="source">
 	<span class='previous'>{$parser.previous}</span>
 	<span class='current'>{$parser.current}</span>
@@ -29,7 +45,30 @@
 		<button on:click={() => parser.init(code)}>Reset</button>
 	</div>
 	<div class="output">
-		<Code code={JSON.stringify($parser.stack.toJSON(), null, 4)} highlight={json}/>
+		<div class="tabs">
+			<button class:br-button-primary={showing === 'stack'} on:click={() => showing = 'stack'}>
+				Show Stack
+			</button>
+			<button class:br-button-primary={showing === 'parserer'} on:click={() => showing = 'parserer'}>
+				Show Parserer
+			</button>
+			<button class:br-button-primary={showing === 'svelte'} on:click={() => showing = 'svelte'}>
+				Show Svelte
+			</button>
+			<button class:br-button-primary={showing === 'diff'} on:click={() => showing = 'diff'}>
+				Show Diff
+			</button>
+		</div>
+		{#if showing === 'stack'}
+			<Code code={stack} highlight={json}/>
+		{:else if showing === 'parserer'}
+			<Code code={parserer} highlight={json}/>
+		{:else if showing === 'svelte'}
+			<Code code={svelte} highlight={json}/>
+		{:else if showing === 'diff'}
+			<Diff currentCode={parserer} currentCodeHighlight={json}
+				originalCode={svelte} originalCodeHighlight={json}/>
+		{/if}
 	</div>
 </div>
 
@@ -43,5 +82,13 @@
 	}
 	.current {
 		background-color: darkblue;
+	}
+	.output {
+		display: flex;
+		flex-direction: column;
+	}
+	.tabs {
+		display: flex;
+		gap: 8px;
 	}
 </style>

@@ -9,7 +9,7 @@
 
 	const parser = createParser();
 
-	let code = '<d><p><p></d>';
+	let code = '<p><p><p>';
 	/** @type {'stack' | 'parserer' | 'svelte' | 'diff'} */
 	let showing = 'stack';
 

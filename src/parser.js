@@ -127,6 +127,13 @@ export function createParser() {
 				autoclosedTag.end = trailingTag.start;
 				parentTag.append(autoclosedTag);
 			},
+			'$stack.popAutoclosedEOF'() {
+				const parentTag = stack.peek({ expect: 'Fragment', depth: 2 });
+				const autoclosedTag = stack.pop({ expect: 'Element', depth: 1 });
+
+				autoclosedTag.end = index;
+				parentTag.append(autoclosedTag);
+			},
 			'$stack.popSelfClosingElement'() {
 				const current = stack.pop({ expect: 'Element' });
 				current.end = index;
@@ -380,6 +387,17 @@ export function createParser() {
 				return closingTagOmitted(
 					potentialAutoclosedTag.name, lastTag.name,
 				);
+			},
+			isAutoclosedEOF() {
+				if (!this.conditions.isDone()) return false;
+				// Could there be an unclosed tag?
+				if (stack.size < 2) return false;
+				const potentialAutoclosedTag = stack.at(-1);
+				if (potentialAutoclosedTag?.type !== 'Element') {
+					return false;
+				}
+				const result = closingTagOmitted(potentialAutoclosedTag.name);
+				return result;
 			},
 			/** @param {string} value */
 			isVoidTag(value) {

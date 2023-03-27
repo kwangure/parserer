@@ -13,7 +13,7 @@
 			"DOM.Iterable"
 		],
 		"module": "esnext",
-		"moduleResolution": "node",
+		"moduleResolution": "nodenext",
 		"preserveValueImports": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,

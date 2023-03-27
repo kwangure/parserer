@@ -591,6 +591,7 @@ export function createParser() {
 
 				return {
 					html: {
+						...fragment.valueOf(),
 						start,
 						end,
 						type: 'Fragment',

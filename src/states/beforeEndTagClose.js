@@ -4,6 +4,12 @@ export const createBeforeEndTagClose = () => atomic({
 	on: {
 		CHARACTER: [
 			{
+				condition: 'isTagCloseAndAutoclosedByParent',
+				actions: [
+					'$stack.popAutoclosedSibling',
+				],
+			},
+			{
 				transitionTo: 'fragment',
 				condition: 'isTagClose',
 				actions: [

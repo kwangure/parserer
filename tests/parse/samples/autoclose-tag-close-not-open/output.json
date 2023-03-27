@@ -1,0 +1,24 @@
+{
+    "html": {
+        "error": {
+            "code": "invalid-closing-tag",
+            "message": "</d> attempted to close a tag that was not open",
+            "start": 3,
+            "end": 7,
+            "type": "Invalid"
+        },
+        "start": 0,
+        "end": 3,
+        "type": "Fragment",
+        "children": [
+            {
+                "start": 0,
+                "end": 3,
+                "type": "Element",
+                "name": "p",
+                "attributes": [],
+                "children": []
+            }
+        ]
+    }
+}

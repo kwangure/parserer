@@ -95,28 +95,30 @@ export function createParser() {
 				last.end = index;
 			},
 			'$stack.popElement'() {
-				const current = stack.pop({ expect: 'Element' });
-				let parentTag = /** @type {ElementChild} */(stack.pop());
-
-				// close any elements that don't have their own closing tags, e.g. <div><p></div>
-				while (parentTag.type === 'Element' && parentTag.name !== current.name) {
-					// TODO: handle autoclosed tags
-					// if (parentTag.type !== 'Element') {
-					console.error('Autoclose tags not implemented');
-					// 	const error = parser.last_auto_closed_tag && parser.last_auto_closed_tag.tag === name
-					// 		? parser_errors.invalid_closing_tag_autoclosed(name, parser.last_auto_closed_tag.reason)
-					// 		: parser_errors.invalid_closing_tag_unopened(name);
-					// 	parser.error(error, start);
-					// }
-
-					parentTag.end = current.start;
-					const nextParent = /** @type {ElementChild} */(stack.pop());
-					nextParent.append(parentTag);
-					parentTag = nextParent;
+				const closingTag = stack.pop({ expect: 'Element' });
+				if (stack.size < 2) {
+					const last = stack.peek();
+					last.error = new PMInvalid({
+						start: closingTag.start,
+						end: index,
+						code: 'invalid-closing-tag',
+						message: `</${closingTag.name}> attempted to close a tag that was not open`,
+					});
+					return;
 				}
-				parentTag.end = index;
+
+				const openingTag = stack.pop({ expect: 'Element' });
+				openingTag.end = index;
+				if (closingTag.name !== openingTag.name) {
+					openingTag.error = new PMInvalid({
+						start: closingTag.start,
+						end: index,
+						code: 'invalid-closing-tag',
+						message: `</${closingTag.name}> attempted to close a tag that was not open`,
+					});
+				}
 				const last = stack.peek();
-				last.append(parentTag);
+				last.append(openingTag);
 				last.end = index;
 			},
 			'$stack.popAutoclosedSibling'() {
@@ -372,6 +374,26 @@ export function createParser() {
 			/** @param {string} value */
 			isTagOpen(value) {
 				return value === '<';
+			},
+			/** @param {string} value */
+			isTagCloseAndAutoclosedByParent(value) {
+				// Is tag close
+				if (value !== '>') return false;
+				// Could there be an unclosed tag?
+				if (stack.size < 2) return false;
+				// TODO: What if there's something between them, e.g a comment?
+				const lastTag = stack.at(-1);
+				const potentialAutoclosedTag = stack.at(-2);
+
+				if (lastTag?.type !== 'Element' || potentialAutoclosedTag?.type !== 'Element') {
+					return false;
+				}
+
+				if (lastTag.name === potentialAutoclosedTag.name) {
+					return false;
+				}
+
+				return closingTagOmitted(potentialAutoclosedTag.name);
 			},
 			isAutoclosedSibling() {
 				// Could there be an unclosed tag?

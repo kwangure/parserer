@@ -19,6 +19,12 @@ export const createEndTagName = () => atomic({
 				],
 			},
 			{
+				condition: 'isTagCloseAndAutoclosedByParent',
+				actions: [
+					'$stack.popAutoclosedSibling',
+				],
+			},
+			{
 				transitionTo: 'fragment',
 				condition: 'isTagClose',
 				actions: [

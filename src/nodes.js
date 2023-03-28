@@ -18,8 +18,6 @@ function PMError(node, property) {
 class PMBaseNode {
 	/** @type {PMAttribute[] | undefined} */
 	#attributes = undefined;
-	/** @type {(PMAttribute | PMComment | PMElement | PMInvalid | PMMustacheTag | PMText)[] | undefined} */
-	#children = undefined;
 	/** @type {string | undefined} */
 	#code = undefined;
 	/** @type {import("estree").Program | undefined} */
@@ -49,7 +47,6 @@ class PMBaseNode {
 	/**
 	 * @param {{
 	 *     attributes?: [];
-	 *     children?: [];
 	 *     code?: string;
 	 *     context?: string;
 	 *     content?: import("estree").Program;
@@ -66,7 +63,6 @@ class PMBaseNode {
 	 */
 	constructor(options) {
 		this.#attributes = options.attributes;
-		this.#children = options.children;
 		this.#code = options.code;
 		this.#context = options.context;
 		this.#content = options.content;
@@ -93,8 +89,8 @@ class PMBaseNode {
 		if (this.#attributes) return this.#attributes;
 		throw PMError(this, 'attributes');
 	}
+	/** @type {any} */
 	get children() {
-		if (this.#children) return this.#children;
 		throw PMError(this, 'children');
 	}
 	get code() {
@@ -263,7 +259,7 @@ export class PMComment extends PMBaseNode {
 }
 
 /**
- * @typedef {PMComment | PMElement | PMInvalid | PMText} PMElementChild
+ * @typedef {PMComment | PMElement | PMText} PMElementChild
  */
 /** @extends {PMBaseNode<'Element'>} */
 export class PMElement extends PMBaseNode {
@@ -280,7 +276,6 @@ export class PMElement extends PMBaseNode {
 	constructor({ name, start, end }) {
 		super({
 			attributes: [],
-			children: [],
 			end,
 			name,
 			start,
@@ -294,7 +289,7 @@ export class PMElement extends PMBaseNode {
 	append(node) {
 		if (node.type === 'Attribute') {
 			this.attributes.push(node);
-		} else if (node.type === 'Comment' || node.type === 'Element' || node.type === 'Invalid') {
+		} else if (node.type === 'Comment' || node.type === 'Element') {
 			this.#children.push(node);
 		} else if (node.type === 'Text') {
 			const lastChild = this.#children.at(-1);
@@ -339,9 +334,16 @@ export class PMElement extends PMBaseNode {
 }
 
 /**
+ * @typedef {PMComment | PMElement | PMText} PMFragmentChild
+ */
+/**
  * @extends {PMBaseNode<'Fragment'>}
  */
 export class PMFragment extends PMBaseNode {
+	/**
+	 * @type {PMFragmentChild[]}
+	 */
+	#children = [];
 	/**
 	 * @param {Object} options
 	 * @param {number} options.start
@@ -349,7 +351,6 @@ export class PMFragment extends PMBaseNode {
 	 */
 	constructor({ start, end }) {
 		super({
-			children: [],
 			end,
 			start,
 			type: 'Fragment',
@@ -363,22 +364,26 @@ export class PMFragment extends PMBaseNode {
 		switch (node.type) {
 			case 'Comment':
 			case 'Element':
-				this.children.push(node);
+				this.#children.push(node);
 				break;
 			case 'Text': {
-				const lastChild = this.children.at(-1);
+				const lastChild = this.#children.at(-1);
 				if (lastChild?.type === 'Text') {
 					lastChild.end = node.end;
 					lastChild.raw += node.raw;
 					lastChild.data = lastChild.raw;
 				} else {
-					this.children.push(node);
+					this.#children.push(node);
 				}
 				break;
 			}
 			default:
 				super.append(node);
 		}
+	}
+	/** @type {any} */
+	get children() {
+		return this.#children;
 	}
 	valueOf() {
 		// Maintain order of test snapshot
@@ -387,7 +392,7 @@ export class PMFragment extends PMBaseNode {
 			start: this.start,
 			end: this.end,
 			type: this.type,
-			children: this.children?.map((child) => child.valueOf()),
+			children: this.#children?.map((child) => child.valueOf()),
 		};
 	}
 }

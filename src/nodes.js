@@ -239,16 +239,9 @@ export class PMComment extends PMBaseNode {
 		});
 	}
 	valueOf() {
-		// Add error first to maintain order in test snapshot
-		/** @type {{} | { error: ReturnType<PMInvalid['valueOf']> }} */
-		let value = {};
-		if (this.error) {
-			value = {
-				error: this.error?.valueOf(),
-			};
-		}
+		// Maintain order of test snapshot
 		return {
-			...value,
+			error: this.error?.valueOf(),
 			start: this.start,
 			end: this.end,
 			type: this.type,

@@ -1,16 +1,10 @@
 import { atomic } from 'hine';
 
 export const createBeforeCommentEnd = () => atomic({
-	always: [
-		{
-			transitionTo: 'done',
-			condition: 'isDone',
-		},
-	],
 	on: {
 		CHARACTER: [
 			{
-				transitionTo: 'fragment',
+				transitionTo: 'commentEnd',
 				condition: 'isTagClose',
 				actions: [
 					'$index.increment',

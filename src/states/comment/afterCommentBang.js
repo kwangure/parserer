@@ -1,23 +1,17 @@
 import { atomic } from 'hine';
 
-export const createBeforeCommentStart = () => atomic({
-	always: [
-		{
-			transitionTo: 'done',
-			condition: 'isDone',
-		},
-	],
+export const createAfterCommentBang = () => atomic({
 	on: {
 		CHARACTER: [
 			{
-				transitionTo: 'commentContent',
+				transitionTo: 'beforeCommentStart',
 				condition: 'isMinus',
 				actions: [
 					'$index.increment',
 				],
 			},
 			{
-				transitionTo: 'invalid',
+				transitionTo: 'invalidComment',
 				actions: [
 					'$error.incompleteComment',
 					'$stack.pushInvalid',

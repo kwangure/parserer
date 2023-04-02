@@ -4,18 +4,14 @@ import { PMAttribute, PMComment, PMElement, PMFragment, PMInvalid, PMMustacheTag
 import { closingTagOmitted } from './utils/html.js';
 import { createAfterAttributeName } from './states/afterAttributeName.js';
 import { createAfterAttributeValueQuoted } from './states/afterAttributeValueQuoted.js';
-import { createAfterCommentBang } from './states/afterCommentBang.js';
-import { createAfterCommentContent } from './states/afterCommentContent.js';
 import { createAttributeName } from './states/attributeName.js';
 import { createAttributeValueMustache } from './states/attributeValueMustache.js';
 import { createAttributeValueQuoted } from './states/attributeValueQuoted.js';
 import { createAttributeValueUnquoted } from './states/attributeValueUnquoted.js';
 import { createBeforeAttributeName } from './states/beforeAttributeName.js';
 import { createBeforeAttributeValue } from './states/beforeAttributeValue.js';
-import { createBeforeCommentEnd } from './states/beforeCommentEnd.js';
-import { createBeforeCommentStart } from './states/beforeCommentStart.js';
 import { createBeforeEndTagClose } from './states/beforeEndTagClose.js';
-import { createCommentContent } from './states/commentContent.js';
+import { createComment } from './states/comment/index.js';
 import { createDone } from './states/done.js';
 import { createEndTagName } from './states/endTagName.js';
 import { createEndTagOpen } from './states/endTagOpen.js';
@@ -438,18 +434,14 @@ export function createParser() {
 			fragment: createFragment(),
 			afterAttributeName: createAfterAttributeName(),
 			afterAttributeValueQuoted: createAfterAttributeValueQuoted(),
-			afterCommentBang: createAfterCommentBang(),
-			afterCommentContent: createAfterCommentContent(),
 			attributeName: createAttributeName(),
 			attributeValueMustache: createAttributeValueMustache(),
 			attributeValueQuoted: createAttributeValueQuoted(),
 			attributeValueUnquoted: createAttributeValueUnquoted(),
 			beforeAttributeName: createBeforeAttributeName(),
 			beforeAttributeValue: createBeforeAttributeValue(),
-			beforeCommentEnd: createBeforeCommentEnd(),
-			beforeCommentStart: createBeforeCommentStart(),
 			beforeEndTagClose: createBeforeEndTagClose(),
-			commentContent: createCommentContent(),
+			comment: createComment(),
 			done: createDone(),
 			endTagName: createEndTagName(),
 			endTagOpen: createEndTagOpen(),
@@ -499,6 +491,11 @@ export function createParser() {
 				while (index < source.length) {
 					this.step();
 				}
+			},
+		},
+		path: {
+			get() {
+				return h.path(parser);
 			},
 		},
 		result: {
@@ -646,6 +643,7 @@ export function createParser() {
 	 *     readonly previous: string;
 	 *     init(_source: string): Parser;
 	 *     parse(): void;
+	 *     path: string;
 	 *     step(): void;
 	 *     readonly stack: PMStack;
 	 *     result: {

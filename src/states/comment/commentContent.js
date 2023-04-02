@@ -1,16 +1,10 @@
 import { atomic } from 'hine';
 
-export const createAfterCommentContent = () => atomic({
-	always: [
-		{
-			transitionTo: 'done',
-			condition: 'isDone',
-		},
-	],
+export const createCommentContent = () => atomic({
 	on: {
 		CHARACTER: [
 			{
-				transitionTo: 'beforeCommentEnd',
+				transitionTo: 'afterCommentContent',
 				condition: 'isMinus',
 				actions: [
 					'$stack.addData',
@@ -18,7 +12,6 @@ export const createAfterCommentContent = () => atomic({
 				],
 			},
 			{
-				transitionTo: 'commentContent',
 				actions: [
 					'$stack.addData',
 					'$index.increment',

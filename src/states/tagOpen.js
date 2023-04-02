@@ -10,7 +10,7 @@ export const createTagOpen = () => atomic({
 	on: {
 		CHARACTER: [
 			{
-				transitionTo: 'afterCommentBang',
+				transitionTo: 'comment',
 				condition: 'isExclamation',
 				actions: [
 					'$stack.pushComment',

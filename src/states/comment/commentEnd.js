@@ -1,12 +1,14 @@
-import { atomic } from 'hine';
+import { Action, atomic } from 'hine';
 
 export const createCommentEnd = () => atomic({
 	entry: [{
 		actions: ['updateParent'],
 	}],
 	actions: {
-		updateParent() {
-			this.parent?.dispatch('DONE');
-		},
+		updateParent: new Action({
+			run() {
+				this.parent?.dispatch('DONE');
+			},
+		}),
 	},
 });

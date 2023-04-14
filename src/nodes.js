@@ -374,7 +374,6 @@ export class PMFragment extends PMBaseNode {
 				super.append(node);
 		}
 	}
-	/** @type {any} */
 	get children() {
 		return this.#children;
 	}

@@ -46,31 +46,32 @@ export function createParser() {
 
 	const parser = h.compound({
 		actions: {
-			'$index.increment'() {
+			'$index.increment': h.action(() => {
 				index += 1;
-			},
-			/** @param {string} value */
-			'$stack.addData'(value) {
+			}),
+			'$stack.addData': h.action((/** @type {string} */ value) => {
 				stack.peek().data += value;
-			},
-			'$stack.addEnd'() {
+			}),
+			'$stack.addEnd': h.action(() => {
 				stack.peek().end = index;
-			},
-			/** @param {string} value */
-			'$stack.addName'(value) {
-				stack.peek().name += value;
-			},
-			/** @param {string} value */
-			'$stack.addRaw'(value) {
+			}),
+			'addName': new h.Action({
+				name: '$stack.addName',
+				/** @param {string} value */
+				run(value) {
+					stack.peek().name += value;
+				},
+			}),
+			'$stack.addRaw': h.action((/** @type {string} */ value) => {
 				stack.peek().raw += value;
-			},
-			'$stack.fromMaybeStack'() {
+			}),
+			'$stack.fromMaybeStack': h.action(() => {
 				stack.push(maybeStack.peek());
-			},
-			'$stack.pop'() {
+			}),
+			'$stack.pop': h.action(() => {
 				stack.pop();
-			},
-			'$stack.popAttribute'() {
+			}),
+			'$stack.popAttribute': h.action(() => {
 				const current = stack.pop({ expect: 'Attribute' });
 				if (Array.isArray(current.value) && current.value.length < 1) {
 					current.end = current.start + current.name.length;
@@ -80,8 +81,8 @@ export function createParser() {
 				}
 				const parent = stack.peek();
 				parent.append(current);
-			},
-			'$stack.popComment'() {
+			}),
+			'$stack.popComment': h.action(() => {
 				const current = stack.pop({ expect: 'Comment' });
 
 				current.data = current.data.slice(0, -2);
@@ -89,8 +90,8 @@ export function createParser() {
 				const last = stack.peek();
 				last.append(current);
 				last.end = index;
-			},
-			'$stack.popElement'() {
+			}),
+			'$stack.popElement': h.action(() => {
 				const closingTag = stack.pop({ expect: 'Element' });
 				if (stack.size < 2) {
 					const last = stack.peek();
@@ -116,30 +117,30 @@ export function createParser() {
 				const last = stack.peek();
 				last.append(openingTag);
 				last.end = index;
-			},
-			'$stack.popAutoclosedSibling'() {
+			}),
+			'$stack.popAutoclosedSibling': h.action(() => {
 				const parentTag = stack.peek({ depth: 3 });
 				const autoclosedTag = stack.pop({ expect: 'Element', depth: 2 });
 				const trailingTag = stack.peek({ expect: 'Element', depth: 1 });
 
 				autoclosedTag.end = trailingTag.start;
 				parentTag.append(autoclosedTag);
-			},
-			'$stack.popAutoclosedEOF'() {
+			}),
+			'$stack.popAutoclosedEOF': h.action(() => {
 				const parentTag = stack.peek({ expect: 'Fragment', depth: 2 });
 				const autoclosedTag = stack.pop({ expect: 'Element', depth: 1 });
 
 				autoclosedTag.end = index;
 				parentTag.append(autoclosedTag);
-			},
-			'$stack.popSelfClosingElement'() {
+			}),
+			'$stack.popSelfClosingElement': h.action(() => {
 				const current = stack.pop({ expect: 'Element' });
 				current.end = index;
 				const last = stack.peek({ expect: 'Fragment' });
 				last.append(current);
 				last.end = index;
-			},
-			'$stack.popInvalid'() {
+			}),
+			'$stack.popInvalid': h.action(() => {
 				const invalid = stack.pop({ expect: 'Invalid' });
 				invalid.end = index;
 
@@ -150,14 +151,14 @@ export function createParser() {
 				const parent = /** @type {ElementChild} */(stack.peek());
 				parent.append(nodeWithError);
 				parent.end = index;
-			},
-			'$stack.popMustache'() {
+			}),
+			'$stack.popMustache': h.action(() => {
 				const current = stack.pop({ expect: 'MustacheTag' });
 				const parent = stack.peek({ expect: 'Attribute' });
 				current.end = index;
 				parent.append(current);
-			},
-			'$stack.popText'() {
+			}),
+			'$stack.popText': h.action(() => {
 				const current = stack.pop({ expect: 'Text' });
 				const parent = stack.peek();
 				current.end = index;
@@ -165,24 +166,23 @@ export function createParser() {
 				// https://github.com/sveltejs/svelte/blob/dd11917fe523a66d8f5d66aab8cbcf965f30f25f/src/compiler/parse/state/tag.ts#L521
 				current.data = current.raw;
 				parent.append(current);
-			},
-			'$stack.pushAttribute'() {
+			}),
+			'$stack.pushAttribute': h.action(() => {
 				const child = new PMAttribute({
 					start: Number(index),
 					name: '',
 				});
 				stack.push(child);
-			},
-			'$stack.pushComment'() {
+			}),
+			'$stack.pushComment': h.action(() => {
 				const tag = stack.pop({ expect: 'Element' });
 				const child = new PMComment({
 					start: tag.start,
 					data: '',
 				});
 				stack.push(child);
-			},
-			/** @param {string} value */
-			'$stack.pushInvalid'(value) {
+			}),
+			'$stack.pushInvalid': h.action((/** @type {string} */ value) => {
 				if (!error) {
 					console.error('Unknown error code');
 					error = {
@@ -196,37 +196,36 @@ export function createParser() {
 				});
 				stack.push(child);
 				error = null;
-			},
-			'$stack.pushTag'() {
+			}),
+			'$stack.pushTag': h.action(() => {
 				const child = (new PMElement({
 					start: Number(index),
 					name: '',
 				}));
 				stack.push(child);
-			},
-			'$stack.pushMustache'() {
+			}),
+			'$stack.pushMustache': h.action(() => {
 				const child = new PMMustacheTag({
 					start: Number(index),
 					raw: '',
 				});
 				stack.push(child);
-			},
-			'$stack.pushText'() {
+			}),
+			'$stack.pushText': h.action(() => {
 				const child = new PMText({
 					start: Number(index),
 					data: '',
 					raw: '',
 				});
 				stack.push(child);
-			},
-			/** @param {string} value */
-			'$maybeStack.addRaw'(value) {
+			}),
+			'$maybeStack.addRaw': h.action((/** @type {string} */ value) => {
 				maybeStack.peek().raw += value;
-			},
-			'$maybeStack.pop'() {
+			}),
+			'$maybeStack.pop': h.action(() => {
 				maybeStack.pop();
-			},
-			'$maybeStack.popText'() {
+			}),
+			'$maybeStack.popText': h.action(() => {
 				const current = maybeStack.pop({ expect: 'Text' });
 				const parent = maybeStack.peek();
 				current.end = index;
@@ -234,56 +233,51 @@ export function createParser() {
 				// https://github.com/sveltejs/svelte/blob/dd11917fe523a66d8f5d66aab8cbcf965f30f25f/src/compiler/parse/state/tag.ts#L521
 				current.data = current.raw;
 				parent.append(current);
-			},
-			'$maybeStack.pushText'() {
+			}),
+			'$maybeStack.pushText': h.action(() => {
 				const child = new PMText({
 					start: Number(index),
 					data: '',
 					raw: '',
 				});
 				maybeStack.push(child);
-			},
-			/** @param {string} value */
-			'$openQuote.set'(value) {
+			}),
+			'$openQuote.set': h.action((/** @type {string} */ value) => {
 				openQuote = value;
-			},
-			/** @param {string} value */
-			'$error.incompleteComment'(value) {
+			}),
+			'$error.incompleteComment': h.action((/** @type {string} */ value) => {
 				error = {
 					code: 'incomplete_comment',
 					message: `Expected a valid comment character but instead found ${quoteChar(value)}`,
 				};
-			},
-			/** @param {string} value */
-			'$error.invalidTagName'(value) {
+			}),
+			'$error.invalidTagName': h.action((/** @type {string} */ value) => {
 				error = {
 					code: 'invalid_tag_name',
 					message: `Expected a valid tag character but instead found ${quoteChar(value)}`,
 				};
-			},
-			'$error.invalidVoidContent'() {
+			}),
+			'$error.invalidVoidContent': h.action(() => {
 				const current = /** @type {PMElement} */(stack.peek());
 
 				error = {
 					code: 'invalid-void-content',
 					message: `<${current.name}> is a void element and cannot have children, or a closing tag`,
 				};
-			},
-			/** @param {string} value */
-			'$error.invalidAttributeName'(value) {
+			}),
+			'$error.invalidAttributeName': h.action((/** @type {string} */ value) => {
 				error = {
 					code: 'invalid_attribute_name',
 					message: `Expected a valid attribute character but instead found ${quoteChar(value)}`,
 				};
-			},
-			/** @param {string} value */
-			'$error.invalidUnquotedValue'(value) {
+			}),
+			'$error.invalidUnquotedValue': h.action((/** @type {string} */ value) => {
 				error = {
 					code: 'invalid_unquoted_value',
 					message: `${quoteChar(value)} is not permitted in unquoted attribute values`,
 				};
-			},
-			'$error.unclosedBlock'() {
+			}),
+			'$error.unclosedBlock': h.action(() => {
 				/** @typedef {PMAttribute | PMComment | PMElement} Block */
 
 				const current = /** @type {Block} */(
@@ -299,99 +293,48 @@ export function createParser() {
 					code: `unclosed-${type}`,
 					message: `${type[0].toUpperCase() + type.substring(1)} was left open`,
 				};
-			},
-			'$mustacheDepth.increment'() {
-				return mustacheDepth += 1;
-			},
-			'$mustacheDepth.decrement'() {
-				return mustacheDepth -= 1;
-			},
-			log() {
-				console.log('isAutoclosed');
-			},
+			}),
+			'$mustacheDepth.increment': h.action(() => mustacheDepth += 1),
+			'$mustacheDepth.decrement': h.action(() => mustacheDepth -= 1),
 		},
 		conditions: {
-			/** @param {string} value */
-			isAlphaCharacter(value) {
-				return (/[A-z]/).test(value);
-			},
-			isDone() {
-				return index === source.length;
-			},
-			/** @param {string} value */
-			isEquals(value) {
-				return value === '=';
-			},
-			/** @param {string} value */
-			isExclamation(value) {
-				return value === '!';
-			},
-			/** @param {string} value */
-			isForwardSlash(value) {
-				return value === '/';
-			},
-			/** @param {string} value */
-			isInvalidUnquotedValue(value) {
-				return (/[\s"'=<>`]/).test(value);
-			},
-			/** @param {string} value */
-			isMinus(value) {
-				return value === '-';
-			},
-			/** @param {string} value */
-			isNonAlphaCharacter(value) {
-				return !(/[A-z]/).test(value);
-			},
-			/** @param {string} value */
-			isQuote(value) {
-				return value === '"' || value === '\'';
-			},
-			/** @param {string} value */
-			isQuoteClosed(value) {
-				return value === openQuote;
-			},
-			/** @param {string} value */
-			isSvelteMustacheClosed(value) {
-				return value === '}';
-			},
-			/** @param {string} value */
-			isSvelteMustacheOpen(value) {
-				return value === '{';
-			},
-			/** @param {string} value */
-			isSveltemustacheDepthDone(value) {
-				return mustacheDepth === 0
-					&& value === '}';
-			},
-			/** @param {string} value */
-			isTagClose(value) {
-				return value === '>';
-			},
-			/** @param {string} value */
-			isTagOpen(value) {
-				return value === '<';
-			},
-			/** @param {string} value */
-			isTagCloseAndAutoclosedByParent(value) {
-				// Is tag close
-				if (value !== '>') return false;
-				// Could there be an unclosed tag?
-				if (stack.size < 2) return false;
-				// TODO: What if there's something between them, e.g a comment?
-				const lastTag = stack.at(-1);
-				const potentialAutoclosedTag = stack.at(-2);
+			isAlphaCharacter: h.condition((/** @type {string} */ value) => (/[A-z]/).test(value)),
+			isDone: h.condition(() => index === source.length),
+			isEquals: h.condition((/** @type {string} */ value) => value === '='),
+			isExclamation: h.condition((/** @type {string} */ value) => value === '!'),
+			isForwardSlash: h.condition((/** @type {string} */ value) => value === '/'),
+			isInvalidUnquotedValue: h.condition((/** @type {string} */ value) => (/[\s"'=<>`]/).test(value)),
+			isMinus: h.condition((/** @type {string} */ value) => value === '-'),
+			isNonAlphaCharacter: h.condition((/** @type {string} */ value) => !(/[A-z]/).test(value)),
+			isQuote: h.condition((/** @type {string} */ value) => value === '"' || value === '\''),
+			isQuoteClosed: h
+				.condition((/** @type {string} */ value) => value == openQuote),
+			isSvelteMustacheClosed: h.condition((/** @type {string} */ value) => value === '}'),
+			isSvelteMustacheOpen: h.condition((/** @type {string} */ value) => value === '{'),
+			isSveltemustacheDepthDone: h.condition((/** @type {string} */ value) => mustacheDepth === 0 && value === '}'),
+			isTagClose: h.condition((/** @type {string} */ value) => value === '>'),
+			isTagOpen: h.condition((/** @type {string} */ value) => value === '<'),
+			isTagCloseAndAutoclosedByParent: h
+				.condition((/** @type {string} */ value) => {
+					// Is tag close
+					if (value !== '>') return false;
+					// Could there be an unclosed tag?
+					if (stack.size < 2) return false;
+					// TODO: What if there's something between them, e.g a comment?
+					const lastTag = stack.at(-1);
+					const potentialAutoclosedTag = stack.at(-2);
 
-				if (lastTag?.type !== 'Element' || potentialAutoclosedTag?.type !== 'Element') {
-					return false;
-				}
+					if (lastTag?.type !== 'Element' || potentialAutoclosedTag?.type !== 'Element') {
+						return false;
+					}
 
-				if (lastTag.name === potentialAutoclosedTag.name) {
-					return false;
-				}
+					if (lastTag.name === potentialAutoclosedTag.name) {
+						return false;
+					}
 
-				return closingTagOmitted(potentialAutoclosedTag.name);
-			},
-			isAutoclosedSibling() {
+					return closingTagOmitted(potentialAutoclosedTag.name);
+				}),
+			isAutoclosedSibling: h.condition(() => {
 				// Could there be an unclosed tag?
 				if (stack.size < 2) return false;
 				// TODO: What is there's something between them, e.g a comment?
@@ -405,30 +348,27 @@ export function createParser() {
 				return closingTagOmitted(
 					potentialAutoclosedTag.name, lastTag.name,
 				);
-			},
-			isAutoclosedEOF() {
-				if (!this.conditions.isDone()) return false;
-				// Could there be an unclosed tag?
-				if (stack.size < 2) return false;
-				const potentialAutoclosedTag = stack.at(-1);
-				if (potentialAutoclosedTag?.type !== 'Element') {
-					return false;
-				}
-				const result = closingTagOmitted(potentialAutoclosedTag.name);
-				return result;
-			},
+			}),
+			isAutoclosedEOF: new h.Condition({
+				run() {
+					if (!this.conditions.isDone.run()) return false;
+					// Could there be an unc)losed tag?
+					if (stack.size < 2) return false;
+					const potentialAutoclosedTag = stack.at(-1);
+					if (potentialAutoclosedTag?.type !== 'Element') {
+						return false;
+					}
+					return closingTagOmitted(potentialAutoclosedTag.name);
+				},
+			}),
 			/** @param {string} value */
-			isVoidTag(value) {
+			isVoidTag: h.condition((/** @type {string} */ value) => {
 				const current = stack.peek({ expect: 'Element' });
 				return isVoidElement(current.name + value);
-			},
+			}),
 			/** @param {string} value */
-			isWhitespace(value) {
-				return (/\s/).test(value);
-			},
-			stackNotEmpty() {
-				return stack.size > 1;
-			},
+			isWhitespace: h.condition((/** @type {string} */ value) => (/\s/).test(value)),
+			stackNotEmpty: h.condition(() => stack.size > 1),
 		},
 		states: {
 			fragment: createFragment(),
@@ -495,7 +435,7 @@ export function createParser() {
 		},
 		path: {
 			get() {
-				return h.path(parser);
+				return h.activePath(parser);
 			},
 		},
 		result: {

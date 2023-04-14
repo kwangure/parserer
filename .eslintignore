@@ -11,3 +11,7 @@ assets
 
 # Miscellaneous
 node_modules
+
+# Svelte requires ESM but Eslint requires CJS
+svelte.config.js
+vite.config.js

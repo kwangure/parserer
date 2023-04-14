@@ -40,16 +40,17 @@ export const ROWTYPE_SPACER = 'spacer';
 class CharacterIdMap {
 	/**
 	 * @readonly
-	 * @type {Map<T, string>}
-	 */
-	#elementToCharacter;
-	/**
-	 * @readonly
 	 * @type {Map<string, T>}
 	 */
 	#characterToElement;
 	/** @type {number} */
 	#charCode;
+	/**
+	 * @readonly
+	 * @type {Map<T, string>}
+	 */
+	#elementToCharacter;
+
 
 	constructor() {
 		this.#elementToCharacter = new Map();
@@ -57,6 +58,16 @@ class CharacterIdMap {
 		this.#charCode = 33;
 	}
 
+	/**
+	 * @param {string} character
+	 */
+	fromChar(character) {
+		const object = this.#characterToElement.get(character);
+		if (object === undefined) {
+			return null;
+		}
+		return object;
+	}
 	/**
 	 * @param {T} object
 	 */
@@ -73,16 +84,7 @@ class CharacterIdMap {
 		return character;
 	}
 
-	/**
-	 * @param {string} character
-	 */
-	fromChar(character) {
-		const object = this.#characterToElement.get(character);
-		if (object === undefined) {
-			return null;
-		}
-		return object;
-	}
+
 }
 
 /**
@@ -106,13 +108,14 @@ const newLineRE = /\r\n?|\n/;
  * 		(lines1:string[], lines2: string[]): DiffArray;
  * }}
  */
-export const lineDiff = function (lines1, lines2) {
+// eslint-disable-next-line func-style
+export const lineDiff = (lines1, lines2) => {
 	lines1 = typeof lines1 === 'string' ? lines1.split(newLineRE) : lines1;
 	lines2 = typeof lines2 === 'string' ? lines2.split(newLineRE) : lines2;
 
 	const idMap = new CharacterIdMap();
-	const text1 = lines1.map(line => idMap.toChar(line)).join('');
-	const text2 = lines2.map(line => idMap.toChar(line)).join('');
+	const text1 = lines1.map((line) => idMap.toChar(line)).join('');
+	const text2 = lines2.map((line) => idMap.toChar(line)).join('');
 
 	const diff = charDiff(text1, text2);
 	const lineDiff = [];
@@ -125,7 +128,7 @@ export const lineDiff = function (lines1, lines2) {
 		lineDiff.push({ 0: diff[i][0], 1: lines });
 	}
 	return lineDiff;
-}
+};
 
 /**
  * @param {DiffArray} diff
@@ -148,7 +151,12 @@ export function buildDiffRows(diff, options = {}) {
 		switch (token[0]) {
 			case OPERATION_EQUAL:
 				if (showDiffOnly) {
-					rows.push(...createEqualRows(token[1], i === 0, i === diff.length - 1));
+					const equalRows = createEqualRows(
+						token[1],
+						i === 0,
+						i === diff.length - 1,
+					);
+					rows.push(...equalRows);
 				} else {
 					for (const line of token[1]) {
 						rows.push(createRow(line, ROWTYPE_EQUAL));
@@ -175,6 +183,8 @@ export function buildDiffRows(diff, options = {}) {
 					}
 				}
 				break;
+			default:
+				break;
 		}
 	}
 
@@ -192,12 +202,14 @@ export function buildDiffRows(diff, options = {}) {
 			for (let i = 0; i < paddingLines && i < lines.length; i++) {
 				equalRows.push(createRow(lines[i], ROWTYPE_EQUAL));
 			}
-			if (lines.length > paddingLines * 2 + 1 && !atEnd) {
-				equalRows.push(createRow(`( … Skipping ${(lines.length - paddingLines * 2)} matching lines … )`, ROWTYPE_SPACER));
+			if (lines.length > (paddingLines * 2) + 1 && !atEnd) {
+				equalRows.push(createRow(`( … Skipping ${(lines.length - (paddingLines * 2))} matching lines … )`, ROWTYPE_SPACER));
 			}
 		}
 		if (!atEnd) {
-			const start = Math.max(lines.length - paddingLines - 1, atStart ? 0 : paddingLines);
+			const start = Math.max(lines.length - paddingLines - 1, atStart
+				? 0
+				: paddingLines);
 			let skip = lines.length - paddingLines - 1;
 			if (!atStart) {
 				skip -= paddingLines;
@@ -240,10 +252,16 @@ export function buildDiffRows(diff, options = {}) {
 					continue;
 				}
 				if (type !== OPERATION_INSERT) {
-					deletionRows[deletionRows.length - 1].tokens.push({ text: lines[i], className });
+					deletionRows[deletionRows.length - 1].tokens.push({
+						className,
+						text: lines[i],
+					});
 				}
 				if (type !== OPERATION_DELETE) {
-					insertionRows[insertionRows.length - 1].tokens.push({ text: lines[i], className });
+					insertionRows[insertionRows.length - 1].tokens.push({
+						className,
+						text: lines[i],
+					});
 				}
 			}
 		}

@@ -2,9 +2,9 @@
 	/* eslint-disable import/no-unresolved */
 	import '@kwangure/strawberry/default/button';
 	import { Code, json } from '@kwangure/strawberry/default/code';
+	import { Diff, State } from '$lib/components';
 	import { Container } from '@kwangure/strawberry/default/input/container';
 	import { createParser } from '@parserer/svelte';
-	import { Diff } from '$lib/components';
 	import { parse as svelteParse } from 'svelte/compiler';
 
 	const parser = createParser();
@@ -43,6 +43,7 @@
 		<button on:click={() => parser.step()}>Step</button>
 		<button on:click={() => parser.parse()}>Parse</button>
 		<button on:click={() => parser.init(code)}>Reset</button>
+		<State state={parser}/>
 	</div>
 	<div class="output">
 		<div class="tabs">

@@ -1,4 +1,4 @@
-import { compound } from 'hine';
+import { compound, Condition } from 'hine';
 import { createAfterCommentBang } from './afterCommentBang.js';
 import { createAfterCommentContent } from './afterCommentContent.js';
 import { createBeforeCommentEnd } from './beforeCommentEnd.js';
@@ -13,8 +13,9 @@ export const createComment = () => compound({
 		condition: 'isDone',
 	}],
 	on: {
-		DONE: [{
+		CHARACTER: [{
 			transitionTo: 'fragment',
+			condition: 'isCommentEnd',
 		}],
 	},
 	states: {
@@ -25,5 +26,12 @@ export const createComment = () => compound({
 		commentContent: createCommentContent(),
 		commentEnd: createCommentEnd(),
 		invalidComment: createInvalidComment(),
+	},
+	conditions: {
+		isCommentEnd: new Condition({
+			run() {
+				return this.matches('comment.commentEnd');
+			},
+		}),
 	},
 });

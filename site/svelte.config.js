@@ -9,6 +9,7 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			'@parserer/svelte': '../src/parser.js',
+			'$types': './src/types.d.ts',
 		},
 	},
 };

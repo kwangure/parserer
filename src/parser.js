@@ -433,11 +433,6 @@ export function createParser() {
 				}
 			},
 		},
-		path: {
-			get() {
-				return h.activePath(parser);
-			},
-		},
 		result: {
 			get() {
 				const fragment = /** @type {PMFragment} */(stack.at(0));
@@ -583,7 +578,6 @@ export function createParser() {
 	 *     readonly previous: string;
 	 *     init(_source: string): Parser;
 	 *     parse(): void;
-	 *     path: string;
 	 *     step(): void;
 	 *     readonly stack: PMStack;
 	 *     result: {
